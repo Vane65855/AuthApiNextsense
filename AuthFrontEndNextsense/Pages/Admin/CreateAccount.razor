@@ -1,0 +1,73 @@
+﻿@page "/admin/create-account"
+@using AuthFrontEndNextsense.DTOs
+@using AuthFrontEndNextsense.Services.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.ComponentModel.DataAnnotations
+@inject IAdminDataService AdminDataService
+@inject NavigationManager Navigation
+
+
+        <h3>Create New Account</h3>
+
+        @if (!string.IsNullOrEmpty(errorMessage)) {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <EditForm Model="userModel" OnValidSubmit="HandleCreateAccount">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <InputText id="username" class="form-control" @bind-Value="userModel.Username" />
+                <ValidationMessage For="@(() => userModel.Username)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="userModel.Password" />
+                <ValidationMessage For="@(() => userModel.Password)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="userModel.ConfirmPassword" />
+                <ValidationMessage For="@(() => userModel.ConfirmPassword)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <InputSelect id="role" class="form-select" @bind-Value="userModel.Role">
+                    <option value="">Select a role</option>
+                    <option value="@AccountRole.User">User</option>
+                    <option value="@AccountRole.Admin">Admin</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => userModel.Role)" />
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="isActive" class="form-check-input" @bind-Value="userModel.IsActive" />
+                <label for="isActive" class="form-check-label">Active</label>
+                <ValidationMessage For="@(() => userModel.IsActive)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </EditForm>
+
+
+@code {
+    private RegisterRequestDto userModel = new();
+    private string errorMessage;
+
+    private async Task HandleCreateAccount() {
+        errorMessage = null;
+        try {
+            await AdminDataService.RegisterAccountAsync(userModel);
+            Navigation.NavigateTo("/admin/admindashboard");
+        }
+        catch (Exception ex) {
+            errorMessage = ex.Message;
+        }
+    }
+}

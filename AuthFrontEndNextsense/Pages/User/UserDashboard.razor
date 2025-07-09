@@ -1,0 +1,17 @@
+﻿@page "/user/dashboard"
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject ILocalStorageService LocalStorage
+
+<h3>User Dashboard</h3>
+
+<h4>Welcome, @username !</h4>
+
+@code {
+    private string username;
+
+    protected override async Task OnInitializedAsync() {
+        username = await LocalStorage.GetItemAsync<string>("username");
+    }
+}

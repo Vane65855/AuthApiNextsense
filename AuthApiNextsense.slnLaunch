@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "START Back and Front End",
+    "Projects": [
+      {
+        "Path": "AuthApiNextsense\\AuthApiNextsense.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "AuthFrontEndNextsense\\AuthFrontEndNextsense.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

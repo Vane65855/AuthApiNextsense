@@ -1,0 +1,77 @@
+﻿@page "/admin/admindashboard"
+@using AuthFrontEndNextsense.DTOs
+@using AuthFrontEndNextsense.Services.Interfaces
+@using AuthFrontEndNextsense.Shared.Admin
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAdminDataService AdminDataService
+@inject NavigationManager Navigation
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3>Admin Dashboard</h3>
+
+        @if (accounts == null) {
+            <div>Accounts is null</div>
+        }
+        else if (!accounts.Any()) {
+            <div>No accounts found.</div>
+        }
+
+        <div class="my-3">
+            <button class="btn btn-success" @onclick="GoToCreateAccount">Create New Account</button>
+        </div>
+
+        <UserTable Accounts="@accounts"
+                   OnEdit="HandleEdit"
+                   OnDeactivate="HandleDeactivate"
+                   OnForceLogout="HandleForceLogout"
+                   OnDelete="HandleDelete" />
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-danger">No Access: You are not authorized to view this page.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private IEnumerable<AccountDto> accounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAccounts();
+    }
+
+    private async Task LoadAccounts()
+    {
+        accounts = await AdminDataService.GetAllAccountsAsync();
+        StateHasChanged();
+    }
+
+    private void GoToCreateAccount()
+    {
+        Navigation.NavigateTo("/admin/create-account");
+    }
+
+    private void HandleEdit(int accountId)
+    {
+        Navigation.NavigateTo($"/admin/edit-account/{accountId}");
+    }
+
+    private async Task HandleDeactivate(int accountId)
+    {
+        await AdminDataService.DeactivateAccountAsync(accountId);
+        await LoadAccounts(); // Refresh the list
+    }
+
+    private async Task HandleForceLogout(int accountId)
+    {
+        await AdminDataService.ForceLogoutAsync(accountId);
+        // No need to reload, as the user state doesn't change visually here
+    }
+
+    private async Task HandleDelete(int accountId)
+    {
+        await AdminDataService.DeleteAccountAsync(accountId);
+        await LoadAccounts(); // Refresh the list
+    }
+}

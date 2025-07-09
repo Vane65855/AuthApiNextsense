@@ -1,0 +1,49 @@
+﻿@using AuthFrontEndNextsense.DTOs
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Is Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Accounts == null) {
+            <tr><td colspan="5"><em>Loading...</em></td></tr>
+        }
+        else {
+            @foreach (var account in Accounts) {
+                <tr>
+                    <td>@account.Username</td>
+                    <td>@account.Role</td>
+                    <td>@(account.IsActive ? "Active" : "Inactive")</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => OnEdit.InvokeAsync(account.Id)">Edit</button>
+                        <button class="btn btn-sm btn-warning" @onclick="() => OnDeactivate.InvokeAsync(account.Id)">Deactivate</button>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => OnForceLogout.InvokeAsync(account.Id)">Force Logout</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => OnDelete.InvokeAsync(account.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public IEnumerable<AccountDto> Accounts { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDeactivate { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnForceLogout { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDelete { get; set; }
+}

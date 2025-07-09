@@ -1,0 +1,95 @@
+﻿@page "/admin/edit-account/{AccountId:int}"
+@using System.Security.Claims
+@using AuthFrontEndNextsense.DTOs
+@using AuthFrontEndNextsense.Services.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAdminDataService AdminDataService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Account</PageTitle>
+
+        <h3>Edit Account</h3>
+
+        @if (isLoading) {
+            <p><em>Loading account details...</em></p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage)) {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else if (userModel != null) {
+            <EditForm Model="userModel" OnValidSubmit="HandleUpdateAccount">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <InputText id="username" class="form-control" @bind-Value="userModel.Username" />
+                    <ValidationMessage For="@(() => userModel.Username)" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <InputSelect id="role" class="form-control" @bind-Value="userModel.Role">
+                        <option value="">Select a role</option>
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => userModel.Role)" />
+                </div>
+
+                <div class="mb-3 form-check">
+                    <InputCheckbox id="isActive" class="form-check-input" @bind-Value="userModel.IsActive" />
+                    <label for="isActive" class="form-check-label">Active</label>
+                    <ValidationMessage For="@(() => userModel.IsActive)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Account</button>
+            </EditForm>
+        }
+
+@code {
+    [Parameter]
+    public int AccountId { get; set; }
+
+    private AccountDto? userModel;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            var account = await AdminDataService.GetAccountByIdAsync(AccountId);
+            if (account != null) {
+                userModel = new AccountDto {
+                    Id = account.Id,
+                    Username = account.Username,
+                    Role = account.Role,
+                    IsActive = account.IsActive
+                };
+            }
+            else {
+                errorMessage = "Account not found.";
+            }
+        }
+        catch (Exception ex) {
+            // Log the exception here if you have a logging service
+            errorMessage = $"An error occurred while fetching the account: {ex.Message}";
+        }
+        finally {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleUpdateAccount() {
+        if (userModel == null) return;
+
+        try {
+            await AdminDataService.EditAccountAsync(AccountId, userModel);
+            Navigation.NavigateTo("/admin/admindashboard");
+        }
+        catch (Exception ex) {
+            // Log the exception
+            errorMessage = $"Failed to update account: {ex.Message}";
+        }
+    }
+}

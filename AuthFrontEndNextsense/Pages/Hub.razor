@@ -1,0 +1,31 @@
+﻿@page "/hub"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Hub</h3>
+        <p>Welcome! Please select a section to continue.</p>
+
+        <div class="mt-4">
+            <button class="btn btn-primary" @onclick="GoToUserSection">User Section</button>
+            <button class="btn btn-secondary" @onclick="GoToAdminSection">Admin Section</button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-danger">You are not authorized to view this page.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private void GoToUserSection() {
+        Navigation.NavigateTo("/user/dashboard");
+    }
+
+    private void GoToAdminSection() {
+        Navigation.NavigateTo("/admin/admindashboard");
+    }
+}
